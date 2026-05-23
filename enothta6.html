@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ενότητα 6 - Quiz</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f766e, #14532d);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 950px;
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 42px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 42px;
+      margin-bottom: 10px;
+    }
+
+    header p {
+      color: #d1fae5;
+      font-size: 18px;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      color: #dcfce7;
+      font-weight: bold;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 14px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: white;
+      transition: width 0.3s ease;
+    }
+
+    .quiz-card {
+      background: white;
+      color: #14532d;
+      border-radius: 22px;
+      padding: 30px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+    }
+
+    .question {
+      font-size: 22px;
+      font-weight: bold;
+      line-height: 1.5;
+      margin-bottom: 25px;
+    }
+
+    .answers {
+      display: grid;
+      gap: 15px;
+      margin-bottom: 22px;
+    }
+
+    .answer-btn {
+      width: 100%;
+      border: 2px solid #d1d5db;
+      border-radius: 16px;
+      background: #e5e7eb;
+      color: #1f2937;
+      padding: 16px 18px;
+      font-size: 16px;
+      text-align: left;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .answer-btn:hover:not(:disabled) {
+      transform: translateY(-3px);
+      background: #d1d5db;
+    }
+
+    .answer-btn.correct {
+      background: #dcfce7;
+      border-color: #16a34a;
+      color: #14532d;
+    }
+
+    .answer-btn.wrong {
+      background: #fee2e2;
+      border-color: #dc2626;
+      color: #7f1d1d;
+    }
+
+    .feedback {
+      display: none;
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 24px;
+      line-height: 1.55;
+    }
+
+    .feedback.correct-box {
+      display: block;
+      background: #dcfce7;
+      border: 2px solid #16a34a;
+      color: #14532d;
+    }
+
+    .feedback.wrong-box {
+      display: block;
+      background: #fee2e2;
+      border: 2px solid #dc2626;
+      color: #7f1d1d;
+    }
+
+    .next-btn,
+    .restart-btn {
+      border: none;
+      border-radius: 16px;
+      background: #14532d;
+      color: white;
+      padding: 15px 28px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.25s;
+    }
+
+    .next-btn:hover,
+    .restart-btn:hover {
+      background: #0f766e;
+      transform: translateY(-4px);
+    }
+
+    .next-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .results {
+      display: none;
+      text-align: center;
+    }
+
+    .results h2 {
+      font-size: 34px;
+      margin-bottom: 14px;
+    }
+
+    .score-text {
+      font-size: 20px;
+      margin-bottom: 26px;
+      line-height: 1.6;
+    }
+
+    .result-bar {
+      height: 18px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .correct-fill {
+      background: #16a34a;
+      height: 100%;
+      width: 0%;
+    }
+
+    .wrong-fill {
+      background: #dc2626;
+      height: 100%;
+      width: 0%;
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>Ενότητα 6</h1>
+      <p>Quiz Χαρτογραφίας & Διαλειτουργικότητας</p>
+    </header>
+
+    <section id="quiz-section">
+      <div class="progress-info">
+        <span id="question-counter"></span>
+        <span id="progress-percent"></span>
+      </div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+
+      <div class="quiz-card">
+        <div class="question" id="question-text"></div>
+        <div class="answers" id="answers"></div>
+        <div class="feedback" id="feedback-box"></div>
+        <button class="next-btn" id="next-btn" disabled>Επόμενη Ερώτηση</button>
+      </div>
+    </section>
+
+    <section class="quiz-card results" id="results-section">
+      <h2>Αποτελέσματα</h2>
+      <p class="score-text" id="score-text"></p>
+
+      <div>
+        <p><strong>Σωστές απαντήσεις</strong></p>
+        <div class="result-bar"><div class="correct-fill" id="correct-fill"></div></div>
+
+        <p><strong>Λάθος απαντήσεις</strong></p>
+        <div class="result-bar"><div class="wrong-fill" id="wrong-fill"></div></div>
+      </div>
+
+      <button class="restart-btn" id="restart-btn">Ξανακάνε το Quiz</button>
+    </section>
+  </main>
+
+  <script>
+    const questions = [
+      {
+        question: "Ποια από τις παρακάτω επιλογές αποτελεί παράδειγμα χάρτη μικρής κλίμακας;",
+        answers: ["Τοπογραφικός χάρτης 1:24.000", "Χάρτης Ευρώπης 1:5.000.000", "Χάρτης πόλης 1:1.000"],
+        correct: 1,
+        explanation: "Οι μικρές κλίμακες απεικονίζουν μεγάλες εκτάσεις με λιγότερη λεπτομέρεια, όπως ένας χάρτης της Ευρώπης."
+      },
+      {
+        question: "Ποια από τις παρακάτω οπτικές μεταβλητές χρησιμοποιείται κυρίως για την αναπαράσταση ποσοτικών ή ταξινομημένων δεδομένων;",
+        answers: ["Απόχρωση", "Σχήμα", "Μέγεθος"],
+        correct: 2,
+        explanation: "Το μέγεθος χρησιμοποιείται συχνά για την απόδοση ποσοτικών διαφορών μεταξύ δεδομένων."
+      },
+      {
+        question: "Ποια από τις παρακάτω οπτικές μεταβλητές είναι κατάλληλη για τη διαφοροποίηση ποιοτικών χαρακτηριστικών;",
+        answers: ["Ένταση", "Μοτίβο", "Μέγεθος"],
+        correct: 1,
+        explanation: "Το μοτίβο βοηθά στη διάκριση ποιοτικών κατηγοριών χωρίς να υποδηλώνει ποσότητα."
+      },
+      {
+        question: "Ποιο από τα παρακάτω αποτελεί βασικό κριτήριο αποτελεσματικότητας ενός χάρτη;",
+        answers: ["Να περιέχει όσο το δυνατόν περισσότερα δεδομένα", "Να επιτελεί τον σκοπό για τον οποίο δημιουργήθηκε", "Να χρησιμοποιεί πάντα μεγάλη κλίμακα"],
+        correct: 1,
+        explanation: "Ένας αποτελεσματικός χάρτης εξυπηρετεί σωστά τον σκοπό και το κοινό για το οποίο δημιουργήθηκε."
+      },
+      {
+        question: "Τι είναι η χωρικοποίηση (spatialization);",
+        answers: ["Η απεικόνιση γεωγραφικών δεδομένων σε 3D", "Η μετατροπή αφηρημένων δεδομένων σε χωρικές αναπαραστάσεις", "Η δημιουργία θεματικών χαρτών με χρώματα"],
+        correct: 1,
+        explanation: "Η χωρικοποίηση μετατρέπει αφηρημένα δεδομένα σε χωρικές μορφές ώστε να γίνουν πιο κατανοητά."
+      },
+      {
+        question: "Τι είναι η γενίκευση (generalization) σε μια γεωοπτικοποίηση;",
+        answers: ["Η αύξηση της κλίμακας", "Η αφαιρετική διαδικασία μείωσης του βαθμού λεπτομέρειας", "Η αυτόματη ταξινόμηση δεδομένων"],
+        correct: 1,
+        explanation: "Η γενίκευση μειώνει λεπτομέρειες ώστε οι χάρτες μικρής κλίμακας να παραμένουν κατανοητοί."
+      },
+      {
+        question: "Ποιος από τους παρακάτω τελεστές γενίκευσης χρησιμοποιείται κυρίως για την απλοποίηση ενός σχήματος;",
+        answers: ["Συνένωση", "Εξομάλυνση", "Μετατόπιση"],
+        correct: 1,
+        explanation: "Η εξομάλυνση αφαιρεί περιττές λεπτομέρειες και κάνει τα σχήματα πιο απλά και ομαλά."
+      },
+      {
+        question: "Ποιο από τα παρακάτω ισχύει για την επιλογή των στοιχείων που θα διατηρηθούν μετά τη γενίκευση;",
+        answers: ["Διατηρούνται μόνο τα μεγαλύτερα αντικείμενα", "Η επιλογή εξαρτάται από το μέγεθος και τον σκοπό της γεωοπτικοποίησης", "Διατηρούνται όλα τα αντικείμενα αλλά αλλάζει το χρώμα τους"],
+        correct: 1,
+        explanation: "Η γενίκευση εξαρτάται από το τι είναι σημαντικό για τον χάρτη και τον σκοπό του."
+      },
+      {
+        question: "Ποια ιδιότητα των ΣΓΠ συμβάλλει σημαντικά στην επίτευξη διαλειτουργικότητας;",
+        answers: ["Η ύπαρξη πολλών θεματικών επιπέδων", "Η ανοικτότητα των δεδομένων και της εσωτερικής δομής", "Η αποκλειστική χρήση vector δεδομένων"],
+        correct: 1,
+        explanation: "Η ανοικτότητα επιτρέπει την ανταλλαγή και συνεργασία μεταξύ διαφορετικών συστημάτων."
+      },
+      {
+        question: "Ποιο είδος ετερογένειας αφορά τις διαφορετικές αντιλήψεις και ορισμούς για την ίδια γεωγραφική οντότητα;",
+        answers: ["Συντακτική ετερογένεια", "Σχηματική ετερογένεια", "Σημασιολογική ετερογένεια"],
+        correct: 2,
+        explanation: "Η σημασιολογική ετερογένεια αφορά διαφορετικές σημασίες ή ορισμούς για την ίδια έννοια."
+      },
+      {
+        question: "Ποιο από τα παρακάτω αποτελεί παράδειγμα σχηματικής ετερογένειας;",
+        answers: ["Η χρήση διαφορετικών ονομάτων για την ίδια έννοια", "Η διαφορετική ταξινόμηση και οργάνωση των ίδιων δεδομένων", "Η χρήση διαφορετικών μοντέλων δεδομένων"],
+        correct: 1,
+        explanation: "Η σχηματική ετερογένεια αφορά διαφορετική δομή ή ταξινόμηση των ίδιων δεδομένων."
+      },
+      {
+        question: "Ποια από τις παρακάτω περιπτώσεις αποτελεί ονομαστική σημασιολογική ετερογένεια;",
+        answers: ["Το δάσος να ορίζεται διαφορετικά", "Το ίδιο όνομα να χρησιμοποιείται για διαφορετικές έννοιες", "Η χρήση διαφορετικών δομών δεδομένων"],
+        correct: 1,
+        explanation: "Η ίδια λέξη μπορεί να αναφέρεται σε διαφορετικές έννοιες, όπως η Ρόδος ως νησί και ως πόλη."
+      }
+    ];
+
+    let currentQuestion = 0;
+    let correctAnswers = 0;
+
+    const questionText = document.getElementById('question-text');
+    const answersBox = document.getElementById('answers');
+    const feedbackBox = document.getElementById('feedback-box');
+    const nextBtn = document.getElementById('next-btn');
+    const questionCounter = document.getElementById('question-counter');
+    const progressPercent = document.getElementById('progress-percent');
+    const progressFill = document.getElementById('progress-fill');
+
+    const quizSection = document.getElementById('quiz-section');
+    const resultsSection = document.getElementById('results-section');
+    const scoreText = document.getElementById('score-text');
+    const correctFill = document.getElementById('correct-fill');
+    const wrongFill = document.getElementById('wrong-fill');
+
+    function loadQuestion() {
+      feedbackBox.className = 'feedback';
+      feedbackBox.innerHTML = '';
+      nextBtn.disabled = true;
+
+      const q = questions[currentQuestion];
+      const letters = ['a', 'b', 'c'];
+
+      questionText.textContent = `${currentQuestion + 1}. ${q.question}`;
+      answersBox.innerHTML = '';
+
+      q.answers.forEach((ans, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'answer-btn';
+        btn.textContent = `${letters[index]}. ${ans}`;
+        btn.onclick = () => selectAnswer(index);
+        answersBox.appendChild(btn);
+      });
+
+      questionCounter.textContent = `Ερώτηση ${currentQuestion + 1} / ${questions.length}`;
+
+      const progress = Math.round((currentQuestion / questions.length) * 100);
+      progressFill.style.width = `${progress}%`;
+      progressPercent.textContent = `${progress}%`;
+    }
+
+    function selectAnswer(index) {
+      const q = questions[currentQuestion];
+      const buttons = document.querySelectorAll('.answer-btn');
+      const correct = index === q.correct;
+
+      if (correct) correctAnswers++;
+
+      buttons.forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === q.correct) btn.classList.add('correct');
+        else btn.classList.add('wrong');
+      });
+
+      feedbackBox.className = correct ? 'feedback correct-box' : 'feedback wrong-box';
+      feedbackBox.innerHTML = `
+        <strong>${correct ? 'Σωστή απάντηση!' : 'Λάθος απάντηση.'}</strong>
+        <p><b>Η σωστή απάντηση είναι:</b> ${q.answers[q.correct]}</p>
+        <p><b>Γιατί:</b> ${q.explanation}</p>
+      `;
+
+      nextBtn.disabled = false;
+    }
+
+    nextBtn.addEventListener('click', () => {
+      currentQuestion++;
+      if (currentQuestion < questions.length) {
+        loadQuestion();
+      } else {
+        showResults();
+      }
+    });
+
+    function showResults() {
+      quizSection.style.display = 'none';
+      resultsSection.style.display = 'block';
+
+      const wrong = questions.length - correctAnswers;
+      const correctPercent = Math.round((correctAnswers / questions.length) * 100);
+      const wrongPercent = 100 - correctPercent;
+
+      scoreText.innerHTML = `Σωστές: <strong>${correctAnswers}</strong><br>Λάθος: <strong>${wrong}</strong>`;
+
+      correctFill.style.width = `${correctPercent}%`;
+      wrongFill.style.width = `${wrongPercent}%`;
+    }
+
+    document.getElementById('restart-btn').addEventListener('click', () => {
+      currentQuestion = 0;
+      correctAnswers = 0;
+      resultsSection.style.display = 'none';
+      quizSection.style.display = 'block';
+      loadQuestion();
+    });
+
+    loadQuestion();
+  </script>
+</body>
+</html>

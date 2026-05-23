@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ενότητα 1 - Quiz</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f766e, #14532d);
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 950px;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 42px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 42px;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    header p {
+      font-size: 18px;
+      color: #d1fae5;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      color: #dcfce7;
+      font-weight: bold;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 14px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: #ffffff;
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    .quiz-card {
+      background: #ffffff;
+      color: #14532d;
+      border-radius: 22px;
+      padding: 30px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .question {
+      font-size: 22px;
+      font-weight: bold;
+      line-height: 1.45;
+      margin-bottom: 25px;
+    }
+
+    .answers {
+      display: grid;
+      gap: 15px;
+      margin-bottom: 22px;
+    }
+
+    .answer-btn {
+      width: 100%;
+      border: 2px solid #d1d5db;
+      border-radius: 16px;
+      background: #e5e7eb;
+      color: #1f2937;
+      padding: 16px 18px;
+      font-size: 16px;
+      text-align: left;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease, border 0.2s ease;
+    }
+
+    .answer-btn:hover:not(:disabled) {
+      transform: translateY(-3px);
+      background: #d1d5db;
+      border-color: #9ca3af;
+    }
+
+    .answer-btn:disabled {
+      cursor: not-allowed;
+    }
+
+    .answer-btn.correct {
+      background: #dcfce7;
+      color: #14532d;
+      border-color: #16a34a;
+    }
+
+    .answer-btn.wrong {
+      background: #fee2e2;
+      color: #7f1d1d;
+      border-color: #dc2626;
+    }
+
+    .feedback {
+      display: none;
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 24px;
+      line-height: 1.55;
+      font-size: 16px;
+    }
+
+    .feedback.correct-box {
+      display: block;
+      background: #dcfce7;
+      color: #14532d;
+      border: 2px solid #16a34a;
+    }
+
+    .feedback.wrong-box {
+      display: block;
+      background: #fee2e2;
+      color: #7f1d1d;
+      border: 2px solid #dc2626;
+    }
+
+    .feedback strong {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 18px;
+    }
+
+    .next-btn,
+    .restart-btn {
+      border: none;
+      border-radius: 16px;
+      background: #14532d;
+      color: #ffffff;
+      padding: 15px 28px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      transition: transform 0.25s ease, background 0.25s ease;
+    }
+
+    .next-btn:hover,
+    .restart-btn:hover {
+      transform: translateY(-4px);
+      background: #0f766e;
+    }
+
+    .next-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .results {
+      display: none;
+      text-align: center;
+    }
+
+    .results h2 {
+      font-size: 34px;
+      margin-bottom: 14px;
+      color: #14532d;
+    }
+
+    .score-text {
+      font-size: 20px;
+      margin-bottom: 26px;
+      line-height: 1.6;
+    }
+
+    .result-bars {
+      display: grid;
+      gap: 18px;
+      margin-bottom: 30px;
+    }
+
+    .result-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .result-bar {
+      height: 18px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .correct-fill,
+    .wrong-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      transition: width 0.5s ease;
+    }
+
+    .correct-fill {
+      background: #16a34a;
+    }
+
+    .wrong-fill {
+      background: #dc2626;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      color: #bbf7d0;
+      font-size: 14px;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 25px;
+      }
+
+      header h1 {
+        font-size: 30px;
+      }
+
+      .quiz-card {
+        padding: 22px;
+      }
+
+      .question {
+        font-size: 19px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <header>
+      <h1>Ενότητα 1</h1>
+      <p>Quiz Γεωπληροφορικής</p>
+    </header>
+
+    <section id="quiz-section">
+      <div class="progress-info">
+        <span id="question-counter">Ερώτηση 1 / 10</span>
+        <span id="progress-percent">0%</span>
+      </div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+
+      <div class="quiz-card">
+        <div class="question" id="question-text"></div>
+        <div class="answers" id="answers"></div>
+        <div class="feedback" id="feedback-box"></div>
+        <button class="next-btn" id="next-btn" disabled>Επόμενη Ερώτηση</button>
+      </div>
+    </section>
+
+    <section class="quiz-card results" id="results-section">
+      <h2>Αποτελέσματα</h2>
+      <p class="score-text" id="score-text"></p>
+
+      <div class="result-bars">
+        <div>
+          <div class="result-label">
+            <span>Σωστές απαντήσεις</span>
+            <span id="correct-percent-text">0%</span>
+          </div>
+          <div class="result-bar">
+            <div class="correct-fill" id="correct-fill"></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="result-label">
+            <span>Λάθος απαντήσεις</span>
+            <span id="wrong-percent-text">0%</span>
+          </div>
+          <div class="result-bar">
+            <div class="wrong-fill" id="wrong-fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <button class="restart-btn" id="restart-btn">Ξανακάνε το Quiz</button>
+    </section>
+
+    <footer>
+      © 2026 Γεωπληροφορική
+    </footer>
+  </main>
+
+  <script>
+    const questions = [
+      {
+        question: "Ποιος είναι ο βασικός στόχος της Επιστήμης της Γεωγραφικής Πληροφορίας (GIScience);",
+        answers: [
+          "Η ανάπτυξη λογισμικού για χαρτογράφηση",
+          "Η κατανόηση, αναπαράσταση και ανάλυση του γεωγραφικού χώρου μέσω γεωχωρικών δεδομένων",
+          "Η αποκλειστική μελέτη δορυφορικών εικόνων"
+        ],
+        correct: 1,
+        explanation: "Η GIScience μελετά πώς κατανοούμε, αναπαριστούμε, διαχειριζόμαστε και αναλύουμε τον γεωγραφικό χώρο με γεωχωρικά δεδομένα."
+      },
+      {
+        question: "Ποια από τις τρεις προσεγγίσεις της GIScience αφορά την κατανόηση της ιδιαιτερότητας της γεωγραφικής πληροφορίας και τον σχεδιασμό συστημάτων;",
+        answers: [
+          "Modelling perspective",
+          "User perspective",
+          "Computing perspective"
+        ],
+        correct: 2,
+        explanation: "Η computing perspective εστιάζει στον τρόπο με τον οποίο η γεωγραφική πληροφορία οργανώνεται, αναπαρίσταται και χρησιμοποιείται στον σχεδιασμό υπολογιστικών συστημάτων."
+      },
+      {
+        question: "Ποιος είναι ο βασικός σκοπός της γεωπληροφορικής;",
+        answers: [
+          "Η κατασκευή γεωδαιτικών οργάνων",
+          "Η αποκλειστική παραγωγή δορυφορικών εικόνων",
+          "Η λήψη αποφάσεων με βάση χωρικές πληροφορίες"
+        ],
+        correct: 2,
+        explanation: "Η γεωπληροφορική χρησιμοποιεί χωρικά δεδομένα και εργαλεία ανάλυσης για να υποστηρίζει καλύτερες αποφάσεις."
+      },
+      {
+        question: "Γιατί ο όρος GIS συχνά συγχέεται με τη γεωπληροφορική;",
+        answers: [
+          "Επειδή τα GIS αναπτύχθηκαν γρήγορα και διαδόθηκαν ευρέως",
+          "Επειδή τα GIS είναι το μοναδικό εργαλείο της γεωπληροφορικής",
+          "Επειδή η γεωπληροφορική δεν χρησιμοποιεί τηλεπισκόπηση"
+        ],
+        correct: 0,
+        explanation: "Τα GIS έγιναν πολύ γνωστά και χρησιμοποιήθηκαν ευρέως, γι’ αυτό πολλές φορές ο κόσμος τα ταυτίζει λανθασμένα με όλο το πεδίο της γεωπληροφορικής."
+      },
+      {
+        question: "Ποιο από τα παρακάτω χαρακτηρίζει καλύτερα τη βασική διαφορά των ΣΓΠ από άλλα πληροφοριακά συστήματα;",
+        answers: [
+          "Χρησιμοποιούν μόνο αριθμητικά δεδομένα",
+          "Διαχειρίζονται σύνθετες χωρικές πληροφορίες και σχέσεις του χώρου",
+          "Αποθηκεύουν δεδομένα χωρίς χωρική αναφορά"
+        ],
+        correct: 1,
+        explanation: "Τα ΣΓΠ ξεχωρίζουν επειδή δεν αποθηκεύουν απλά δεδομένα, αλλά δεδομένα με χωρική θέση και σχέσεις μεταξύ γεωγραφικών αντικειμένων."
+      },
+      {
+        question: "Ποιο είδος ερωτήματος απαντούν τα ΣΓΠ όταν εξετάζουν περιοχές με υψηλές συγκεντρώσεις φοιτητών σε μια πόλη;",
+        answers: [
+          "Ερωτήματα θέσης",
+          "Ερωτήματα προτύπων",
+          "Ερωτήματα συνθηκών"
+        ],
+        correct: 1,
+        explanation: "Οι υψηλές συγκεντρώσεις δείχνουν μοτίβα ή πρότυπα στον χώρο, άρα πρόκειται για ερώτημα προτύπων."
+      },
+      {
+        question: "Ποιο από τα παρακάτω αποτελεί παράδειγμα ερωτήματος συνθηκών σε ένα ΣΓΠ;",
+        answers: [
+          "Πού βρίσκονται οι περιοχές Natura 2000 στην Ελλάδα",
+          "Ποιες περιοχές απέχουν ≤500 μ. από μετρό, ≤300 μ. από σχολείο και έχουν τιμή ζώνης <1500€",
+          "Ποιοι νομοί παρουσιάζουν μείωση αγροτικού πληθυσμού την τελευταία δεκαετία"
+        ],
+        correct: 1,
+        explanation: "Το ερώτημα βάζει συγκεκριμένες συνθήκες και φίλτρα, όπως απόσταση από μετρό, απόσταση από σχολείο και τιμή ζώνης."
+      },
+      {
+        question: "Ποια από τις παρακάτω δηλώσεις περιγράφει σωστά τη θεμελιώδη βάση της γεωπληροφορικής;",
+        answers: [
+          "Η γεωγραφία αποτελεί το κύριο θεωρητικό υπόβαθρο της γεωπληροφορικής",
+          "Η γεωπληροφορική βασίζεται κυρίως στη χαρτογραφία και στη γεωδαισία",
+          "Η επιστήμη των υπολογιστών αποτελεί τον πυρήνα της γεωπληροφορικής"
+        ],
+        correct: 2,
+        explanation: "Η γεωπληροφορική βασίζεται έντονα στην επιστήμη των υπολογιστών, επειδή απαιτεί αποθήκευση, επεξεργασία, ανάλυση και οπτικοποίηση γεωχωρικών δεδομένων."
+      },
+      {
+        question: "Ποιο από τα παρακάτω αποτελεί χαρακτηριστικό παράδειγμα της ιδέας της «Ψηφιακής Γης»;",
+        answers: [
+          "Η χρήση χαρτών χαμηλής ανάλυσης για εκπαιδευτικούς σκοπούς",
+          "Το δημόσιο αρχείο του Google Earth Engine με δεκαετίες γεωαναφερόμενων δεδομένων",
+          "Η δημιουργία τρισδιάστατων μοντέλων μόνο για μεγάλα αστικά κέντρα"
+        ],
+        correct: 1,
+        explanation: "Η «Ψηφιακή Γη» συνδέεται με μεγάλες ψηφιακές συλλογές γεωαναφερόμενων δεδομένων, όπως το Google Earth Engine."
+      },
+      {
+        question: "Ποιο ηθικό ζήτημα προκύπτει από τη συνεχή συλλογή χωρικών δεδομένων μέσω smartphones;",
+        answers: [
+          "Η δυσκολία στη χρήση χαρτών χωρίς σύνδεση στο διαδίκτυο",
+          "Η πιθανότητα γεωδουλείας μέσω παρακολούθησης της θέσης ατόμων",
+          "Η αδυναμία καταγραφής δορυφορικών εικόνων υψηλής ανάλυσης"
+        ],
+        correct: 1,
+        explanation: "Η συνεχής συλλογή θέσης μπορεί να οδηγήσει σε παρακολούθηση ατόμων και περιορισμό της ιδιωτικότητας, κάτι που συνδέεται με τη γεωδουλεία."
+      }
+    ];
+
+    let currentQuestion = 0;
+    let selectedAnswer = null;
+    let correctAnswers = 0;
+    let answered = false;
+
+    const questionText = document.getElementById("question-text");
+    const answersBox = document.getElementById("answers");
+    const feedbackBox = document.getElementById("feedback-box");
+    const nextBtn = document.getElementById("next-btn");
+    const questionCounter = document.getElementById("question-counter");
+    const progressPercent = document.getElementById("progress-percent");
+    const progressFill = document.getElementById("progress-fill");
+    const quizSection = document.getElementById("quiz-section");
+    const resultsSection = document.getElementById("results-section");
+    const scoreText = document.getElementById("score-text");
+    const correctFill = document.getElementById("correct-fill");
+    const wrongFill = document.getElementById("wrong-fill");
+    const correctPercentText = document.getElementById("correct-percent-text");
+    const wrongPercentText = document.getElementById("wrong-percent-text");
+    const restartBtn = document.getElementById("restart-btn");
+
+    function loadQuestion() {
+      selectedAnswer = null;
+      answered = false;
+      nextBtn.disabled = true;
+      feedbackBox.className = "feedback";
+      feedbackBox.innerHTML = "";
+
+      const q = questions[currentQuestion];
+      const letters = ["a", "b", "c"];
+      questionText.textContent = `${currentQuestion + 1}. ${q.question}`;
+      answersBox.innerHTML = "";
+
+      q.answers.forEach((answer, index) => {
+        const button = document.createElement("button");
+        button.className = "answer-btn";
+        button.textContent = `${letters[index]}. ${answer}`;
+        button.onclick = () => selectAnswer(index);
+        answersBox.appendChild(button);
+      });
+
+      questionCounter.textContent = `Ερώτηση ${currentQuestion + 1} / ${questions.length}`;
+      updateProgress();
+
+      nextBtn.textContent = currentQuestion === questions.length - 1 ? "Τέλος Quiz" : "Επόμενη Ερώτηση";
+    }
+
+    function selectAnswer(index) {
+      if (answered) return;
+
+      answered = true;
+      selectedAnswer = index;
+      nextBtn.disabled = false;
+
+      const q = questions[currentQuestion];
+      const answerButtons = document.querySelectorAll(".answer-btn");
+      const isCorrect = selectedAnswer === q.correct;
+
+      if (isCorrect) {
+        correctAnswers++;
+      }
+
+      answerButtons.forEach((btn, btnIndex) => {
+        btn.disabled = true;
+
+        if (btnIndex === q.correct) {
+          btn.classList.add("correct");
+        } else {
+          btn.classList.add("wrong");
+        }
+      });
+
+      feedbackBox.className = isCorrect ? "feedback correct-box" : "feedback wrong-box";
+      feedbackBox.innerHTML = `
+        <strong>${isCorrect ? "Σωστή απάντηση!" : "Λάθος απάντηση."}</strong>
+        <p><b>Η σωστή απάντηση είναι:</b> ${q.answers[q.correct]}</p>
+        <p><b>Γιατί:</b> ${q.explanation}</p>
+      `;
+    }
+
+    function updateProgress() {
+      const percent = Math.round((currentQuestion / questions.length) * 100);
+      progressFill.style.width = `${percent}%`;
+      progressPercent.textContent = `${percent}%`;
+    }
+
+    function nextQuestion() {
+      currentQuestion++;
+
+      if (currentQuestion < questions.length) {
+        loadQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function showResults() {
+      quizSection.style.display = "none";
+      resultsSection.style.display = "block";
+
+      const wrongAnswers = questions.length - correctAnswers;
+      const correctPercent = Math.round((correctAnswers / questions.length) * 100);
+      const wrongPercent = Math.round((wrongAnswers / questions.length) * 100);
+
+      scoreText.innerHTML = `Σωστές: <strong>${correctAnswers}</strong><br>Λάθος: <strong>${wrongAnswers}</strong><br>Σύνολο ερωτήσεων: <strong>${questions.length}</strong>`;
+
+      correctFill.style.width = `${correctPercent}%`;
+      wrongFill.style.width = `${wrongPercent}%`;
+      correctPercentText.textContent = `${correctPercent}%`;
+      wrongPercentText.textContent = `${wrongPercent}%`;
+    }
+
+    function restartQuiz() {
+      currentQuestion = 0;
+      selectedAnswer = null;
+      correctAnswers = 0;
+      answered = false;
+
+      resultsSection.style.display = "none";
+      quizSection.style.display = "block";
+
+      correctFill.style.width = "0%";
+      wrongFill.style.width = "0%";
+
+      loadQuestion();
+    }
+
+    nextBtn.addEventListener("click", nextQuestion);
+    restartBtn.addEventListener("click", restartQuiz);
+
+    loadQuestion();
+  </script>
+</body>
+</html>

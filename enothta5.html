@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ενότητα 5 - Quiz</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f766e, #14532d);
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 950px;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 42px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 42px;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    header p {
+      font-size: 18px;
+      color: #d1fae5;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      color: #dcfce7;
+      font-weight: bold;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 14px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: #ffffff;
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    .quiz-card {
+      background: #ffffff;
+      color: #14532d;
+      border-radius: 22px;
+      padding: 30px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .question {
+      font-size: 22px;
+      font-weight: bold;
+      line-height: 1.45;
+      margin-bottom: 25px;
+    }
+
+    .answers {
+      display: grid;
+      gap: 15px;
+      margin-bottom: 22px;
+    }
+
+    .answer-btn {
+      width: 100%;
+      border: 2px solid #d1d5db;
+      border-radius: 16px;
+      background: #e5e7eb;
+      color: #1f2937;
+      padding: 16px 18px;
+      font-size: 16px;
+      text-align: left;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease, border 0.2s ease;
+    }
+
+    .answer-btn:hover:not(:disabled) {
+      transform: translateY(-3px);
+      background: #d1d5db;
+      border-color: #9ca3af;
+    }
+
+    .answer-btn:disabled {
+      cursor: not-allowed;
+    }
+
+    .answer-btn.correct {
+      background: #dcfce7;
+      color: #14532d;
+      border-color: #16a34a;
+    }
+
+    .answer-btn.wrong {
+      background: #fee2e2;
+      color: #7f1d1d;
+      border-color: #dc2626;
+    }
+
+    .feedback {
+      display: none;
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 24px;
+      line-height: 1.55;
+      font-size: 16px;
+    }
+
+    .feedback.correct-box {
+      display: block;
+      background: #dcfce7;
+      color: #14532d;
+      border: 2px solid #16a34a;
+    }
+
+    .feedback.wrong-box {
+      display: block;
+      background: #fee2e2;
+      color: #7f1d1d;
+      border: 2px solid #dc2626;
+    }
+
+    .feedback strong {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 18px;
+    }
+
+    .next-btn,
+    .restart-btn {
+      border: none;
+      border-radius: 16px;
+      background: #14532d;
+      color: #ffffff;
+      padding: 15px 28px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      transition: transform 0.25s ease, background 0.25s ease;
+    }
+
+    .next-btn:hover,
+    .restart-btn:hover {
+      transform: translateY(-4px);
+      background: #0f766e;
+    }
+
+    .next-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .results {
+      display: none;
+      text-align: center;
+    }
+
+    .results h2 {
+      font-size: 34px;
+      margin-bottom: 14px;
+      color: #14532d;
+    }
+
+    .score-text {
+      font-size: 20px;
+      margin-bottom: 26px;
+      line-height: 1.6;
+    }
+
+    .result-bars {
+      display: grid;
+      gap: 18px;
+      margin-bottom: 30px;
+    }
+
+    .result-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .result-bar {
+      height: 18px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .correct-fill,
+    .wrong-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      transition: width 0.5s ease;
+    }
+
+    .correct-fill {
+      background: #16a34a;
+    }
+
+    .wrong-fill {
+      background: #dc2626;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      color: #bbf7d0;
+      font-size: 14px;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 25px;
+      }
+
+      header h1 {
+        font-size: 30px;
+      }
+
+      .quiz-card {
+        padding: 22px;
+      }
+
+      .question {
+        font-size: 19px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <header>
+      <h1>Ενότητα 5</h1>
+      <p>Quiz Χωρικής Ανάλυσης & Αποστάσεων</p>
+    </header>
+
+    <section id="quiz-section">
+      <div class="progress-info">
+        <span id="question-counter">Ερώτηση 1 / 10</span>
+        <span id="progress-percent">0%</span>
+      </div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+
+      <div class="quiz-card">
+        <div class="question" id="question-text"></div>
+        <div class="answers" id="answers"></div>
+        <div class="feedback" id="feedback-box"></div>
+        <button class="next-btn" id="next-btn" disabled>Επόμενη Ερώτηση</button>
+      </div>
+    </section>
+
+    <section class="quiz-card results" id="results-section">
+      <h2>Αποτελέσματα</h2>
+      <p class="score-text" id="score-text"></p>
+
+      <div class="result-bars">
+        <div>
+          <div class="result-label">
+            <span>Σωστές απαντήσεις</span>
+            <span id="correct-percent-text">0%</span>
+          </div>
+          <div class="result-bar">
+            <div class="correct-fill" id="correct-fill"></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="result-label">
+            <span>Λάθος απαντήσεις</span>
+            <span id="wrong-percent-text">0%</span>
+          </div>
+          <div class="result-bar">
+            <div class="wrong-fill" id="wrong-fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <button class="restart-btn" id="restart-btn">Ξανακάνε το Quiz</button>
+    </section>
+
+    <footer>
+      © 2026 Γεωπληροφορική
+    </footer>
+  </main>
+
+  <script>
+    const questions = [
+      {
+        question: "Τι εκφράζει ο χωρικός μέσος (spatial mean);",
+        answers: [
+          "Τη μέση απόσταση μεταξύ όλων των σημείων",
+          "Τη συνοπτική θέση ενός συνόλου χωρικών παρατηρήσεων",
+          "Τη μέγιστη τιμή ενός χωρικού χαρακτηριστικού"
+        ],
+        correct: 1,
+        explanation: "Ο χωρικός μέσος συνοψίζει τη θέση ενός συνόλου χωρικών παρατηρήσεων, όπως το γεωμετρικό κέντρο ενός συνόλου σημείων."
+      },
+      {
+        question: "Τι μετρά η τυπική απόσταση (standard distance);",
+        answers: [
+          "Τη διασπορά των σημείων γύρω από τον χωρικό μέσο",
+          "Τη μέση τιμή των παρατηρήσεων",
+          "Τη γωνιακή απόκλιση μεταξύ δύο σημείων"
+        ],
+        correct: 0,
+        explanation: "Η τυπική απόσταση δείχνει πόσο διασκορπισμένα είναι τα σημεία γύρω από τον χωρικό μέσο."
+      },
+      {
+        question: "Ποιος είναι ο βασικός στόχος της χωρικής ομαδοποίησης;",
+        answers: [
+          "Η δημιουργία χαρτών υψηλής ανάλυσης",
+          "Ο εντοπισμός ομάδων σημείων με μικρές μεταξύ τους αποστάσεις",
+          "Η ταξινόμηση πολυγώνων σε θεματικές κατηγορίες"
+        ],
+        correct: 1,
+        explanation: "Η χωρική ομαδοποίηση στοχεύει στον εντοπισμό clusters, δηλαδή ομάδων σημείων που βρίσκονται κοντά μεταξύ τους."
+      },
+      {
+        question: "Ποιο από τα παρακάτω ισχύει για το ελάχιστο κυρτό πολύγωνο (ΕΚΠ);",
+        answers: [
+          "Περιέχει μόνο τις κορυφές του αρχικού πολυγώνου",
+          "Είναι το μικρότερο κυρτό σχήμα που περιέχει όλα τα σημεία",
+          "Υπολογίζεται μόνο για κυκλικά αντικείμενα"
+        ],
+        correct: 1,
+        explanation: "Το ελάχιστο κυρτό πολύγωνο είναι το μικρότερο κυρτό περίγραμμα που περικλείει όλα τα σημεία ενός συνόλου."
+      },
+      {
+        question: "Πότε μπορεί να χρησιμοποιηθεί η Ευκλείδεια απόσταση για τον υπολογισμό της απόστασης μεταξύ δύο σημείων;",
+        answers: [
+          "Όταν τα σημεία απέχουν λιγότερο από ~20 km",
+          "Μόνο όταν βρίσκονται στον Ισημερινό",
+          "Μόνο όταν έχουν το ίδιο υψόμετρο"
+        ],
+        correct: 0,
+        explanation: "Η Ευκλείδεια απόσταση είναι καλή προσέγγιση για μικρές αποστάσεις, όπου η καμπυλότητα της Γης δεν επηρεάζει σημαντικά τον υπολογισμό."
+      },
+      {
+        question: "Ποια από τις παρακάτω αποστάσεις χρησιμοποιείται όταν η κίνηση δεν μπορεί να γίνει σε ευθεία γραμμή, όπως σε πόλεις με ορθογωνικό οδικό δίκτυο;",
+        answers: [
+          "Σφαιρική απόσταση",
+          "Manhattan City Block",
+          "Minkowski με p = 0"
+        ],
+        correct: 1,
+        explanation: "Η απόσταση Manhattan υπολογίζει κίνηση κατά μήκος κάθετων/οριζόντιων διαδρομών, όπως σε ορθογωνικό οδικό δίκτυο."
+      },
+      {
+        question: "Τι εκφράζει η συναρτησιακή απόσταση (functional distance);",
+        answers: [
+          "Την πραγματική γεωμετρική απόσταση μεταξύ δύο σημείων",
+          "Το κόστος μετακίνησης (χρόνος, χρήμα, κόπος) αντί της φυσικής απόστασης",
+          "Την απόσταση σε τρισδιάστατο χώρο"
+        ],
+        correct: 1,
+        explanation: "Η συναρτησιακή απόσταση δεν μετρά μόνο μέτρα ή χιλιόμετρα, αλλά κόστος μετακίνησης όπως χρόνο, χρήμα ή προσπάθεια."
+      },
+      {
+        question: "Ποια είναι η βασική αρχή του αλγορίθμου Dijkstra;",
+        answers: [
+          "Επιλέγει πάντα το μονοπάτι με τις λιγότερες στροφές",
+          "Επιλέγει διαδοχικά τον κόμβο με το μικρότερο συνολικό κόστος από την αρχή",
+          "Υπολογίζει μόνο αποστάσεις Manhattan"
+        ],
+        correct: 1,
+        explanation: "Ο Dijkstra βρίσκει τη συντομότερη διαδρομή επιλέγοντας κάθε φορά τον κόμβο με το μικρότερο γνωστό συνολικό κόστος από την αρχική θέση."
+      },
+      {
+        question: "Ποια από τις παρακάτω επιλογές αποτελεί χαρακτηριστικό της συστηματικής δειγματοληψίας;",
+        answers: [
+          "Επιλογή σημείων εντελώς τυχαία",
+          "Επιλογή σημείων βάσει υποθετικού πλέγματος",
+          "Επιλογή σημείων μόνο πάνω σε ισοϋψείς"
+        ],
+        correct: 1,
+        explanation: "Στη συστηματική δειγματοληψία τα σημεία επιλέγονται με κανονική διάταξη, συνήθως πάνω σε πλέγμα."
+      },
+      {
+        question: "Ποιο από τα παρακάτω αποτελεί συνδυασμένο χωρικό και θεματικό κριτήριο στο παράδειγμα χωροθέτησης;",
+        answers: [
+          "Η περιοχή να έχει εμβαδό τουλάχιστον 4.000 m²",
+          "Η περιοχή να βρίσκεται σε υψόμετρο 300–600 m",
+          "Η περιοχή να απέχει 5 km από πόλεις άνω των 3.500 κατοίκων"
+        ],
+        correct: 2,
+        explanation: "Το κριτήριο συνδυάζει χωρική συνθήκη απόστασης, δηλαδή 5 km, με θεματική ιδιότητα των πόλεων, δηλαδή πληθυσμό άνω των 3.500 κατοίκων."
+      }
+    ];
+
+    let currentQuestion = 0;
+    let selectedAnswer = null;
+    let correctAnswers = 0;
+    let answered = false;
+
+    const questionText = document.getElementById("question-text");
+    const answersBox = document.getElementById("answers");
+    const feedbackBox = document.getElementById("feedback-box");
+    const nextBtn = document.getElementById("next-btn");
+    const questionCounter = document.getElementById("question-counter");
+    const progressPercent = document.getElementById("progress-percent");
+    const progressFill = document.getElementById("progress-fill");
+    const quizSection = document.getElementById("quiz-section");
+    const resultsSection = document.getElementById("results-section");
+    const scoreText = document.getElementById("score-text");
+    const correctFill = document.getElementById("correct-fill");
+    const wrongFill = document.getElementById("wrong-fill");
+    const correctPercentText = document.getElementById("correct-percent-text");
+    const wrongPercentText = document.getElementById("wrong-percent-text");
+    const restartBtn = document.getElementById("restart-btn");
+
+    function loadQuestion() {
+      selectedAnswer = null;
+      answered = false;
+      nextBtn.disabled = true;
+      feedbackBox.className = "feedback";
+      feedbackBox.innerHTML = "";
+
+      const q = questions[currentQuestion];
+      const letters = ["a", "b", "c"];
+      questionText.textContent = `${currentQuestion + 1}. ${q.question}`;
+      answersBox.innerHTML = "";
+
+      q.answers.forEach((answer, index) => {
+        const button = document.createElement("button");
+        button.className = "answer-btn";
+        button.textContent = `${letters[index]}. ${answer}`;
+        button.onclick = () => selectAnswer(index);
+        answersBox.appendChild(button);
+      });
+
+      questionCounter.textContent = `Ερώτηση ${currentQuestion + 1} / ${questions.length}`;
+      updateProgress();
+
+      nextBtn.textContent = currentQuestion === questions.length - 1 ? "Τέλος Quiz" : "Επόμενη Ερώτηση";
+    }
+
+    function selectAnswer(index) {
+      if (answered) return;
+
+      answered = true;
+      selectedAnswer = index;
+      nextBtn.disabled = false;
+
+      const q = questions[currentQuestion];
+      const answerButtons = document.querySelectorAll(".answer-btn");
+      const isCorrect = selectedAnswer === q.correct;
+
+      if (isCorrect) {
+        correctAnswers++;
+      }
+
+      answerButtons.forEach((btn, btnIndex) => {
+        btn.disabled = true;
+
+        if (btnIndex === q.correct) {
+          btn.classList.add("correct");
+        } else {
+          btn.classList.add("wrong");
+        }
+      });
+
+      feedbackBox.className = isCorrect ? "feedback correct-box" : "feedback wrong-box";
+      feedbackBox.innerHTML = `
+        <strong>${isCorrect ? "Σωστή απάντηση!" : "Λάθος απάντηση."}</strong>
+        <p><b>Η σωστή απάντηση είναι:</b> ${q.answers[q.correct]}</p>
+        <p><b>Γιατί:</b> ${q.explanation}</p>
+      `;
+    }
+
+    function updateProgress() {
+      const percent = Math.round((currentQuestion / questions.length) * 100);
+      progressFill.style.width = `${percent}%`;
+      progressPercent.textContent = `${percent}%`;
+    }
+
+    function nextQuestion() {
+      currentQuestion++;
+
+      if (currentQuestion < questions.length) {
+        loadQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function showResults() {
+      quizSection.style.display = "none";
+      resultsSection.style.display = "block";
+
+      const wrongAnswers = questions.length - correctAnswers;
+      const correctPercent = Math.round((correctAnswers / questions.length) * 100);
+      const wrongPercent = Math.round((wrongAnswers / questions.length) * 100);
+
+      scoreText.innerHTML = `Σωστές: <strong>${correctAnswers}</strong><br>Λάθος: <strong>${wrongAnswers}</strong><br>Σύνολο ερωτήσεων: <strong>${questions.length}</strong>`;
+
+      correctFill.style.width = `${correctPercent}%`;
+      wrongFill.style.width = `${wrongPercent}%`;
+      correctPercentText.textContent = `${correctPercent}%`;
+      wrongPercentText.textContent = `${wrongPercent}%`;
+    }
+
+    function restartQuiz() {
+      currentQuestion = 0;
+      selectedAnswer = null;
+      correctAnswers = 0;
+      answered = false;
+
+      resultsSection.style.display = "none";
+      quizSection.style.display = "block";
+
+      correctFill.style.width = "0%";
+      wrongFill.style.width = "0%";
+
+      loadQuestion();
+    }
+
+    nextBtn.addEventListener("click", nextQuestion);
+    restartBtn.addEventListener("click", restartQuiz);
+
+    loadQuestion();
+  </script>
+</body>
+</html>

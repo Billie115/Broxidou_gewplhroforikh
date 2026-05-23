@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ενότητα 3 - Quiz</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f766e, #14532d);
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 950px;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 42px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 42px;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    header p {
+      font-size: 18px;
+      color: #d1fae5;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      color: #dcfce7;
+      font-weight: bold;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 14px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: #ffffff;
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    .quiz-card {
+      background: #ffffff;
+      color: #14532d;
+      border-radius: 22px;
+      padding: 30px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .question {
+      font-size: 22px;
+      font-weight: bold;
+      line-height: 1.45;
+      margin-bottom: 25px;
+    }
+
+    .answers {
+      display: grid;
+      gap: 15px;
+      margin-bottom: 22px;
+    }
+
+    .answer-btn {
+      width: 100%;
+      border: 2px solid #d1d5db;
+      border-radius: 16px;
+      background: #e5e7eb;
+      color: #1f2937;
+      padding: 16px 18px;
+      font-size: 16px;
+      text-align: left;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease, border 0.2s ease;
+    }
+
+    .answer-btn:hover:not(:disabled) {
+      transform: translateY(-3px);
+      background: #d1d5db;
+      border-color: #9ca3af;
+    }
+
+    .answer-btn:disabled {
+      cursor: not-allowed;
+    }
+
+    .answer-btn.correct {
+      background: #dcfce7;
+      color: #14532d;
+      border-color: #16a34a;
+    }
+
+    .answer-btn.wrong {
+      background: #fee2e2;
+      color: #7f1d1d;
+      border-color: #dc2626;
+    }
+
+    .feedback {
+      display: none;
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 24px;
+      line-height: 1.55;
+      font-size: 16px;
+    }
+
+    .feedback.correct-box {
+      display: block;
+      background: #dcfce7;
+      color: #14532d;
+      border: 2px solid #16a34a;
+    }
+
+    .feedback.wrong-box {
+      display: block;
+      background: #fee2e2;
+      color: #7f1d1d;
+      border: 2px solid #dc2626;
+    }
+
+    .feedback strong {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 18px;
+    }
+
+    .next-btn,
+    .restart-btn {
+      border: none;
+      border-radius: 16px;
+      background: #14532d;
+      color: #ffffff;
+      padding: 15px 28px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      transition: transform 0.25s ease, background 0.25s ease;
+    }
+
+    .next-btn:hover,
+    .restart-btn:hover {
+      transform: translateY(-4px);
+      background: #0f766e;
+    }
+
+    .next-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .results {
+      display: none;
+      text-align: center;
+    }
+
+    .results h2 {
+      font-size: 34px;
+      margin-bottom: 14px;
+      color: #14532d;
+    }
+
+    .score-text {
+      font-size: 20px;
+      margin-bottom: 26px;
+      line-height: 1.6;
+    }
+
+    .result-bars {
+      display: grid;
+      gap: 18px;
+      margin-bottom: 30px;
+    }
+
+    .result-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .result-bar {
+      height: 18px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .correct-fill,
+    .wrong-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      transition: width 0.5s ease;
+    }
+
+    .correct-fill {
+      background: #16a34a;
+    }
+
+    .wrong-fill {
+      background: #dc2626;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      color: #bbf7d0;
+      font-size: 14px;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 25px;
+      }
+
+      header h1 {
+        font-size: 30px;
+      }
+
+      .quiz-card {
+        padding: 22px;
+      }
+
+      .question {
+        font-size: 19px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <header>
+      <h1>Ενότητα 3</h1>
+      <p>Quiz Χωρικών Μοντέλων & Δομών Δεδομένων</p>
+    </header>
+
+    <section id="quiz-section">
+      <div class="progress-info">
+        <span id="question-counter">Ερώτηση 1 / 18</span>
+        <span id="progress-percent">0%</span>
+      </div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+
+      <div class="quiz-card">
+        <div class="question" id="question-text"></div>
+        <div class="answers" id="answers"></div>
+        <div class="feedback" id="feedback-box"></div>
+        <button class="next-btn" id="next-btn" disabled>Επόμενη Ερώτηση</button>
+      </div>
+    </section>
+
+    <section class="quiz-card results" id="results-section">
+      <h2>Αποτελέσματα</h2>
+      <p class="score-text" id="score-text"></p>
+
+      <div class="result-bars">
+        <div>
+          <div class="result-label">
+            <span>Σωστές απαντήσεις</span>
+            <span id="correct-percent-text">0%</span>
+          </div>
+          <div class="result-bar">
+            <div class="correct-fill" id="correct-fill"></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="result-label">
+            <span>Λάθος απαντήσεις</span>
+            <span id="wrong-percent-text">0%</span>
+          </div>
+          <div class="result-bar">
+            <div class="wrong-fill" id="wrong-fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <button class="restart-btn" id="restart-btn">Ξανακάνε το Quiz</button>
+    </section>
+
+    <footer>
+      © 2026 Γεωπληροφορική
+    </footer>
+  </main>
+
+  <script>
+    const questions = [
+      {
+        question: "Ποιο είναι το βασικό χαρακτηριστικό του μοντέλου πεδίων;",
+        answers: [
+          "Αναπαριστά τον χώρο ως σύνολο διακριτών αντικειμένων",
+          "Αντιμετωπίζει τον χώρο ως συνεχές μέσο με τιμές που μεταβάλλονται από θέση σε θέση",
+          "Χρησιμοποιεί μόνο γραμμικά γεωμετρικά στοιχεία"
+        ],
+        correct: 1,
+        explanation: "Το μοντέλο πεδίων θεωρεί ότι ένα φαινόμενο υπάρχει συνεχώς στον χώρο και η τιμή του μπορεί να αλλάζει από θέση σε θέση."
+      },
+      {
+        question: "Πότε προτιμάται το μοντέλο αντικειμένων σε ένα ΣΓΠ;",
+        answers: [
+          "Όταν τα φαινόμενα μεταβάλλονται συνεχώς στο χώρο",
+          "Όταν θέλουμε να αναπαραστήσουμε δεδομένα όπως υψόμετρο ή υγρασία",
+          "Όταν τα γεωγραφικά χαρακτηριστικά έχουν διακριτά όρια, όπως δρόμοι ή διοικητικές περιοχές"
+        ],
+        correct: 2,
+        explanation: "Το μοντέλο αντικειμένων είναι κατάλληλο για οντότητες που μπορούν να ξεχωρίσουν με σαφή όρια, όπως δρόμοι, κτίρια ή διοικητικές περιοχές."
+      },
+      {
+        question: "Ποια από τις παρακάτω έννοιες αποτελεί θεματικό χαρακτηριστικό σε μοντέλο αντικειμένων;",
+        answers: [
+          "Το σχήμα ενός πολυγώνου",
+          "Η θέση ενός σημείου",
+          "Η πυκνότητα πληθυσμού μιας χώρας"
+        ],
+        correct: 2,
+        explanation: "Η πυκνότητα πληθυσμού είναι περιγραφική πληροφορία μιας γεωγραφικής οντότητας, όχι γεωμετρία ή θέση."
+      },
+      {
+        question: "Ποιο από τα παρακάτω είναι παράδειγμα εφαρμογής του μοντέλου πεδίων;",
+        answers: [
+          "Χαρτογράφηση οδικού δικτύου",
+          "Αναπαράσταση υψομέτρου ή υγρασίας εδάφους",
+          "Οριοθέτηση διοικητικών περιφερειών"
+        ],
+        correct: 1,
+        explanation: "Το υψόμετρο και η υγρασία εδάφους μεταβάλλονται συνεχώς στον χώρο, άρα ταιριάζουν στο μοντέλο πεδίων."
+      },
+      {
+        question: "Ποια είναι η βασική διαφορά μεταξύ raster και vector δομής;",
+        answers: [
+          "Το raster χρησιμοποιεί πλέγμα κελιών, ενώ το vector χρησιμοποιεί σημεία–γραμμές–πολύγωνα",
+          "Το raster αποθηκεύει μόνο θεματικά δεδομένα, ενώ το vector μόνο χωρικά",
+          "Το raster είναι πάντα πιο ακριβές από το vector"
+        ],
+        correct: 0,
+        explanation: "Η raster δομή βασίζεται σε φατνία/κελιά, ενώ η vector δομή αναπαριστά οντότητες με σημεία, γραμμές και πολύγωνα."
+      },
+      {
+        question: "Ποιος από τους παρακάτω τρόπους αποτελεί έμμεσο προσδιορισμό θέσης;",
+        answers: [
+          "Συντεταγμένες WGS84",
+          "Ταχυδρομική διεύθυνση",
+          "Αναφορά στο κέντρο βάρους ενός πολυγώνου"
+        ],
+        correct: 1,
+        explanation: "Η ταχυδρομική διεύθυνση δεν είναι άμεσες συντεταγμένες· χρειάζεται γεωκωδικοποίηση για να μετατραπεί σε θέση στον χώρο."
+      },
+      {
+        question: "Ποια από τις παρακάτω επιλογές αποτελεί χωρική ιδιότητα;",
+        answers: [
+          "Η χρήση γης",
+          "Το εμβαδόν ενός πολυγώνου",
+          "Η ταχυδρομική διεύθυνση"
+        ],
+        correct: 1,
+        explanation: "Το εμβαδόν προκύπτει από τη γεωμετρία ενός πολυγώνου, άρα είναι χωρική ιδιότητα."
+      },
+      {
+        question: "Ποια από τις παρακάτω επιλογές αποτελεί τοπολογική χωρική σχέση;",
+        answers: [
+          "Απόσταση μεταξύ δύο σημείων",
+          "Το αν δύο πολύγωνα τέμνονται ή γειτνιάζουν",
+          "Το υψόμετρο ενός σημείου"
+        ],
+        correct: 1,
+        explanation: "Οι τοπολογικές σχέσεις περιγράφουν συνδέσεις, γειτνίαση, επικάλυψη, τομή ή περιεχόμενα μεταξύ γεωμετριών."
+      },
+      {
+        question: "Ποια από τις παρακάτω σχέσεις θεωρείται μετρική;",
+        answers: [
+          "Το Α1 περιέχεται στο Α2",
+          "Η πόλη Α βρίσκεται ανατολικά της Β",
+          "Η απόσταση μεταξύ δύο αντικειμένων"
+        ],
+        correct: 2,
+        explanation: "Οι μετρικές σχέσεις βασίζονται σε μετρήσιμα μεγέθη, όπως απόσταση, μήκος ή εμβαδόν."
+      },
+      {
+        question: "Ποια από τις παρακάτω σχέσεις είναι τοπολογική;",
+        answers: [
+          "Η κατεύθυνση ενός αντικειμένου ως προς ένα άλλο",
+          "Το αν δύο πολύγωνα εφάπτονται ή τέμνονται",
+          "Η απόσταση μεταξύ δύο σημείων"
+        ],
+        correct: 1,
+        explanation: "Η επαφή και η τομή είναι τοπολογικές σχέσεις, επειδή περιγράφουν τη χωρική σύνδεση μεταξύ αντικειμένων."
+      },
+      {
+        question: "Ποιο από τα παρακάτω δεδομένα αποτελεί τυπικό παράδειγμα κανονικοποιημένης (raster) δομής;",
+        answers: [
+          "Οδικό δίκτυο",
+          "Δορυφορική εικόνα",
+          "Πολυγωνικές διοικητικές ενότητες"
+        ],
+        correct: 1,
+        explanation: "Οι δορυφορικές εικόνες αποτελούνται από pixels, άρα είναι χαρακτηριστικό παράδειγμα raster δεδομένων."
+      },
+      {
+        question: "Τι συμβαίνει όταν το μέγεθος του φατνίου είναι πολύ μικρό σε σχέση με τα αντικείμενα;",
+        answers: [
+          "Η διακριτική ικανότητα μειώνεται",
+          "Αυξάνεται η διακριτική ικανότητα αλλά και ο απαιτούμενος χώρος αποθήκευσης",
+          "Τα όρια των αντικειμένων γίνονται πιο ασαφή"
+        ],
+        correct: 1,
+        explanation: "Μικρότερο φατνίο σημαίνει καλύτερη λεπτομέρεια, αλλά απαιτούνται περισσότερα κελιά και άρα περισσότερος χώρος αποθήκευσης."
+      },
+      {
+        question: "Πώς κωδικοποιείται ένα πολύγωνο στη δομή Spaghetti;",
+        answers: [
+          "Με ένα μόνο σημείο",
+          "Με σειρά σημείων όπου το πρώτο και τελευταίο σημείο ταυτίζονται",
+          "Με πίνακα φατνίων"
+        ],
+        correct: 1,
+        explanation: "Στη δομή Spaghetti ένα πολύγωνο αποθηκεύεται ως ακολουθία συντεταγμένων, με κλείσιμο όταν το πρώτο και τελευταίο σημείο ταυτίζονται."
+      },
+      {
+        question: "Ποιος είναι ο κύριος στόχος των μεθόδων οργάνωσης κανονικοποιημένων γεωγραφικών δεδομένων;",
+        answers: [
+          "Η αύξηση της χωρικής ανάλυσης",
+          "Η συμπίεση και η εξοικονόμηση χώρου αποθήκευσης",
+          "Η μετατροπή των δεδομένων σε διανυσματική μορφή"
+        ],
+        correct: 1,
+        explanation: "Οι μέθοδοι οργάνωσης raster δεδομένων συχνά στοχεύουν στη μείωση του όγκου δεδομένων και στην αποδοτικότερη αποθήκευση."
+      },
+      {
+        question: "Ποια τεχνική σάρωσης αποφεύγει τα μεγάλα «άλματα» μεταξύ φατνίων και απαιτεί πίνακες με διαστάσεις δύναμη του 2;",
+        answers: [
+          "Βουστροφηδόν",
+          "Κατά Morton (Z-order)",
+          "Κατά γραμμή"
+        ],
+        correct: 1,
+        explanation: "Η διάταξη Morton ή Z-order διατηρεί καλύτερα τη χωρική γειτνίαση και συνδέεται με πίνακες διαστάσεων δύναμης του 2."
+      },
+      {
+        question: "Ποιο είναι το κύριο μειονέκτημα των αναλογικών χαρτών ως πηγή δευτερογενών δεδομένων;",
+        answers: [
+          "Η πολύ υψηλή χωρική ανάλυση",
+          "Η εξάρτηση της ακρίβειας από την κλίμακα και η γενίκευση των οντοτήτων",
+          "Η αδυναμία μετατροπής τους σε ψηφιακή μορφή"
+        ],
+        correct: 1,
+        explanation: "Οι αναλογικοί χάρτες έχουν ακρίβεια που εξαρτάται από την κλίμακα και συχνά περιέχουν γενικευμένες οντότητες."
+      },
+      {
+        question: "Ποια από τις παρακάτω επιλογές αποτελεί πηγή πρωτογενών γεωγραφικών δεδομένων διανυσματικής δομής;",
+        answers: [
+          "Ψηφιοποίηση αναλογικών χαρτών",
+          "Τοπογραφικές μετρήσεις στο πεδίο",
+          "Δορυφορικές εικόνες LANDSAT"
+        ],
+        correct: 1,
+        explanation: "Οι τοπογραφικές μετρήσεις στο πεδίο συλλέγονται άμεσα και μπορούν να παράγουν vector δεδομένα όπως σημεία, γραμμές και πολύγωνα."
+      },
+      {
+        question: "Ποια από τις παρακάτω προτάσεις περιγράφει σωστά τη βασική αρχή λειτουργίας του GPS;",
+        answers: [
+          "Υπολογίζει τη θέση μετρώντας αποστάσεις από τουλάχιστον τέσσερις δορυφόρους",
+          "Απαιτεί μόνο έναν δορυφόρο για τον προσδιορισμό θέσης",
+          "Παρέχει ακρίβεια 1 μέτρου σε πραγματικό χρόνο χωρίς μετεπεξεργασία"
+        ],
+        correct: 0,
+        explanation: "Το GPS υπολογίζει θέση μέσω αποστάσεων από πολλούς δορυφόρους· συνήθως απαιτούνται τουλάχιστον τέσσερις για θέση και διόρθωση χρόνου."
+      }
+    ];
+
+    let currentQuestion = 0;
+    let selectedAnswer = null;
+    let correctAnswers = 0;
+    let answered = false;
+
+    const questionText = document.getElementById("question-text");
+    const answersBox = document.getElementById("answers");
+    const feedbackBox = document.getElementById("feedback-box");
+    const nextBtn = document.getElementById("next-btn");
+    const questionCounter = document.getElementById("question-counter");
+    const progressPercent = document.getElementById("progress-percent");
+    const progressFill = document.getElementById("progress-fill");
+    const quizSection = document.getElementById("quiz-section");
+    const resultsSection = document.getElementById("results-section");
+    const scoreText = document.getElementById("score-text");
+    const correctFill = document.getElementById("correct-fill");
+    const wrongFill = document.getElementById("wrong-fill");
+    const correctPercentText = document.getElementById("correct-percent-text");
+    const wrongPercentText = document.getElementById("wrong-percent-text");
+    const restartBtn = document.getElementById("restart-btn");
+
+    function loadQuestion() {
+      selectedAnswer = null;
+      answered = false;
+      nextBtn.disabled = true;
+      feedbackBox.className = "feedback";
+      feedbackBox.innerHTML = "";
+
+      const q = questions[currentQuestion];
+      const letters = ["a", "b", "c"];
+      questionText.textContent = `${currentQuestion + 1}. ${q.question}`;
+      answersBox.innerHTML = "";
+
+      q.answers.forEach((answer, index) => {
+        const button = document.createElement("button");
+        button.className = "answer-btn";
+        button.textContent = `${letters[index]}. ${answer}`;
+        button.onclick = () => selectAnswer(index);
+        answersBox.appendChild(button);
+      });
+
+      questionCounter.textContent = `Ερώτηση ${currentQuestion + 1} / ${questions.length}`;
+      updateProgress();
+
+      nextBtn.textContent = currentQuestion === questions.length - 1 ? "Τέλος Quiz" : "Επόμενη Ερώτηση";
+    }
+
+    function selectAnswer(index) {
+      if (answered) return;
+
+      answered = true;
+      selectedAnswer = index;
+      nextBtn.disabled = false;
+
+      const q = questions[currentQuestion];
+      const answerButtons = document.querySelectorAll(".answer-btn");
+      const isCorrect = selectedAnswer === q.correct;
+
+      if (isCorrect) {
+        correctAnswers++;
+      }
+
+      answerButtons.forEach((btn, btnIndex) => {
+        btn.disabled = true;
+
+        if (btnIndex === q.correct) {
+          btn.classList.add("correct");
+        } else {
+          btn.classList.add("wrong");
+        }
+      });
+
+      feedbackBox.className = isCorrect ? "feedback correct-box" : "feedback wrong-box";
+      feedbackBox.innerHTML = `
+        <strong>${isCorrect ? "Σωστή απάντηση!" : "Λάθος απάντηση."}</strong>
+        <p><b>Η σωστή απάντηση είναι:</b> ${q.answers[q.correct]}</p>
+        <p><b>Γιατί:</b> ${q.explanation}</p>
+      `;
+    }
+
+    function updateProgress() {
+      const percent = Math.round((currentQuestion / questions.length) * 100);
+      progressFill.style.width = `${percent}%`;
+      progressPercent.textContent = `${percent}%`;
+    }
+
+    function nextQuestion() {
+      currentQuestion++;
+
+      if (currentQuestion < questions.length) {
+        loadQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function showResults() {
+      quizSection.style.display = "none";
+      resultsSection.style.display = "block";
+
+      const wrongAnswers = questions.length - correctAnswers;
+      const correctPercent = Math.round((correctAnswers / questions.length) * 100);
+      const wrongPercent = Math.round((wrongAnswers / questions.length) * 100);
+
+      scoreText.innerHTML = `Σωστές: <strong>${correctAnswers}</strong><br>Λάθος: <strong>${wrongAnswers}</strong><br>Σύνολο ερωτήσεων: <strong>${questions.length}</strong>`;
+
+      correctFill.style.width = `${correctPercent}%`;
+      wrongFill.style.width = `${wrongPercent}%`;
+      correctPercentText.textContent = `${correctPercent}%`;
+      wrongPercentText.textContent = `${wrongPercent}%`;
+    }
+
+    function restartQuiz() {
+      currentQuestion = 0;
+      selectedAnswer = null;
+      correctAnswers = 0;
+      answered = false;
+
+      resultsSection.style.display = "none";
+      quizSection.style.display = "block";
+
+      correctFill.style.width = "0%";
+      wrongFill.style.width = "0%";
+
+      loadQuestion();
+    }
+
+    nextBtn.addEventListener("click", nextQuestion);
+    restartBtn.addEventListener("click", restartQuiz);
+
+    loadQuestion();
+  </script>
+</body>
+</html>

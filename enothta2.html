@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ενότητα 2 - Quiz</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f766e, #14532d);
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 950px;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 42px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 42px;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    header p {
+      font-size: 18px;
+      color: #d1fae5;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      color: #dcfce7;
+      font-weight: bold;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 14px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: #ffffff;
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    .quiz-card {
+      background: #ffffff;
+      color: #14532d;
+      border-radius: 22px;
+      padding: 30px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .question {
+      font-size: 22px;
+      font-weight: bold;
+      line-height: 1.45;
+      margin-bottom: 25px;
+    }
+
+    .answers {
+      display: grid;
+      gap: 15px;
+      margin-bottom: 22px;
+    }
+
+    .answer-btn {
+      width: 100%;
+      border: 2px solid #d1d5db;
+      border-radius: 16px;
+      background: #e5e7eb;
+      color: #1f2937;
+      padding: 16px 18px;
+      font-size: 16px;
+      text-align: left;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease, border 0.2s ease;
+    }
+
+    .answer-btn:hover:not(:disabled) {
+      transform: translateY(-3px);
+      background: #d1d5db;
+      border-color: #9ca3af;
+    }
+
+    .answer-btn:disabled {
+      cursor: not-allowed;
+    }
+
+    .answer-btn.correct {
+      background: #dcfce7;
+      color: #14532d;
+      border-color: #16a34a;
+    }
+
+    .answer-btn.wrong {
+      background: #fee2e2;
+      color: #7f1d1d;
+      border-color: #dc2626;
+    }
+
+    .feedback {
+      display: none;
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 24px;
+      line-height: 1.55;
+      font-size: 16px;
+    }
+
+    .feedback.correct-box {
+      display: block;
+      background: #dcfce7;
+      color: #14532d;
+      border: 2px solid #16a34a;
+    }
+
+    .feedback.wrong-box {
+      display: block;
+      background: #fee2e2;
+      color: #7f1d1d;
+      border: 2px solid #dc2626;
+    }
+
+    .feedback strong {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 18px;
+    }
+
+    .next-btn,
+    .restart-btn {
+      border: none;
+      border-radius: 16px;
+      background: #14532d;
+      color: #ffffff;
+      padding: 15px 28px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      transition: transform 0.25s ease, background 0.25s ease;
+    }
+
+    .next-btn:hover,
+    .restart-btn:hover {
+      transform: translateY(-4px);
+      background: #0f766e;
+    }
+
+    .next-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .results {
+      display: none;
+      text-align: center;
+    }
+
+    .results h2 {
+      font-size: 34px;
+      margin-bottom: 14px;
+      color: #14532d;
+    }
+
+    .score-text {
+      font-size: 20px;
+      margin-bottom: 26px;
+      line-height: 1.6;
+    }
+
+    .result-bars {
+      display: grid;
+      gap: 18px;
+      margin-bottom: 30px;
+    }
+
+    .result-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .result-bar {
+      height: 18px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .correct-fill,
+    .wrong-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      transition: width 0.5s ease;
+    }
+
+    .correct-fill {
+      background: #16a34a;
+    }
+
+    .wrong-fill {
+      background: #dc2626;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      color: #bbf7d0;
+      font-size: 14px;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 25px;
+      }
+
+      header h1 {
+        font-size: 30px;
+      }
+
+      .quiz-card {
+        padding: 22px;
+      }
+
+      .question {
+        font-size: 19px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <header>
+      <h1>Ενότητα 2</h1>
+      <p>Quiz Τηλεπισκόπησης & Γεωχωρικών Δεδομένων</p>
+    </header>
+
+    <section id="quiz-section">
+      <div class="progress-info">
+        <span id="question-counter">Ερώτηση 1 / 27</span>
+        <span id="progress-percent">0%</span>
+      </div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+
+      <div class="quiz-card">
+        <div class="question" id="question-text"></div>
+        <div class="answers" id="answers"></div>
+        <div class="feedback" id="feedback-box"></div>
+        <button class="next-btn" id="next-btn" disabled>Επόμενη Ερώτηση</button>
+      </div>
+    </section>
+
+    <section class="quiz-card results" id="results-section">
+      <h2>Αποτελέσματα</h2>
+      <p class="score-text" id="score-text"></p>
+
+      <div class="result-bars">
+        <div>
+          <div class="result-label">
+            <span>Σωστές απαντήσεις</span>
+            <span id="correct-percent-text">0%</span>
+          </div>
+          <div class="result-bar">
+            <div class="correct-fill" id="correct-fill"></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="result-label">
+            <span>Λάθος απαντήσεις</span>
+            <span id="wrong-percent-text">0%</span>
+          </div>
+          <div class="result-bar">
+            <div class="wrong-fill" id="wrong-fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <button class="restart-btn" id="restart-btn">Ξανακάνε το Quiz</button>
+    </section>
+
+    <footer>
+      © 2026 Γεωπληροφορική
+    </footer>
+  </main>
+
+  <script>
+    const questions = [
+      {
+        question: "Ποιο από τα παρακάτω αποτελεί βασικό χαρακτηριστικό όλων των μεθόδων τηλεπισκόπησης;",
+        answers: ["Η ανάγκη φυσικής επαφής με το αντικείμενο παρατήρησης", "Η καταγραφή ηλεκτρομαγνητικής ακτινοβολίας που εκπέμπεται ή ανακλάται από αντικείμενα", "Η χρήση αποκλειστικά αναλογικών φωτογραφικών μηχανών"],
+        correct: 1,
+        explanation: "Η τηλεπισκόπηση βασίζεται στη συλλογή πληροφοριών από απόσταση, κυρίως μέσω της ηλεκτρομαγνητικής ακτινοβολίας που ανακλάται ή εκπέμπεται."
+      },
+      {
+        question: "Ποια από τις παρακάτω εφαρμογές ανήκει τυπικά στον τομέα της τηλεπισκόπησης;",
+        answers: ["Υπολογισμός φορολογικών ζωνών σε αστικές περιοχές", "Παρακολούθηση χιονοκάλυψης και τήξης για υδρολογικά μοντέλα", "Καταγραφή πληθυσμιακών τάσεων μέσω απογραφών"],
+        correct: 1,
+        explanation: "Η χιονοκάλυψη μπορεί να παρακολουθηθεί με δορυφορικά ή άλλα εξ αποστάσεως δεδομένα, άρα είναι τυπική εφαρμογή τηλεπισκόπησης."
+      },
+      {
+        question: "Ποια από τις παρακάτω διατυπώσεις περιγράφει καλύτερα τον γενικό ορισμό της τηλεπισκόπησης;",
+        answers: ["Η συλλογή δεδομένων αποκλειστικά από δορυφόρους χαμηλής τροχιάς", "Η καταγραφή ή μέτρηση αντικειμένων χωρίς φυσική επαφή και η ανάλυση των δεδομένων για εξαγωγή πληροφοριών", "Η χρήση UAV για φωτογράφιση αστικών περιοχών"],
+        correct: 1,
+        explanation: "Η τηλεπισκόπηση δεν περιορίζεται μόνο σε δορυφόρους ή UAV· αφορά γενικά μέτρηση από απόσταση χωρίς φυσική επαφή."
+      },
+      {
+        question: "Ποιο από τα παρακάτω αποτελεί σημαντικό πλεονέκτημα της τηλεπισκόπησης;",
+        answers: ["Η ανάγκη συνεχούς επιτόπιας δειγματοληψίας", "Η δυνατότητα πολυφασματικής καταγραφής δεδομένων σε μη ορατά μήκη κύματος", "Η αδυναμία κάλυψης μεγάλων περιοχών σε μία εικόνα"],
+        correct: 1,
+        explanation: "Η τηλεπισκόπηση μπορεί να καταγράφει πληροφορία σε πολλά φασματικά κανάλια, ακόμα και πέρα από το ορατό φάσμα."
+      },
+      {
+        question: "Ποιος από τους παρακάτω παράγοντες αποτελεί βασικό περιορισμό των οπτικών συστημάτων τηλεπισκόπησης;",
+        answers: ["Η υπερβολικά υψηλή χωρική ανάλυση", "Η εξάρτηση από τις καιρικές συνθήκες, όπως νεφοκάλυψη και θολούρα", "Η αδυναμία καταγραφής θερμικής ακτινοβολίας"],
+        correct: 1,
+        explanation: "Τα οπτικά συστήματα επηρεάζονται έντονα από νεφοκάλυψη, καπνό, υγρασία και θολούρα στην ατμόσφαιρα."
+      },
+      {
+        question: "Ποια από τις παρακάτω διατυπώσεις περιγράφει σωστά τη βασική αρχή ενός παθητικού συστήματος τηλεπισκόπησης;",
+        answers: ["Εκπέμπει δέσμες λέιζερ για να μετρήσει την απόσταση των αντικειμένων", "Καταγράφει την ανακλώμενη ή εκπεμπόμενη ακτινοβολία από αντικείμενα χωρίς να εκπέμπει δική του ενέργεια", "Λειτουργεί μόνο τη νύχτα καταγράφοντας θερμική ακτινοβολία"],
+        correct: 1,
+        explanation: "Τα παθητικά συστήματα δεν στέλνουν δική τους ενέργεια· καταγράφουν ακτινοβολία που υπάρχει ήδη, όπως η ηλιακή ανάκλαση ή η θερμική εκπομπή."
+      },
+      {
+        question: "Τι είναι οι «φασματικές υπογραφές»;",
+        answers: ["Οι καμπύλες που δείχνουν την ταχύτητα διάδοσης της ακτινοβολίας στο κενό", "Οι χαρακτηριστικές καμπύλες ανάκλασης/εκπομπής διαφορετικών αντικειμένων σε διάφορα μήκη κύματος", "Οι γραφικές παραστάσεις της θερμοκρασίας των αισθητήρων ενός δορυφόρου"],
+        correct: 1,
+        explanation: "Κάθε υλικό ή αντικείμενο έχει χαρακτηριστική συμπεριφορά ανάκλασης ή εκπομπής σε διαφορετικά μήκη κύματος."
+      },
+      {
+        question: "Ποιο είναι το κύριο έργο του επίγειου τμήματος (ground segment) σε ένα σύστημα τηλεπισκόπησης;",
+        answers: ["Η σάρωση της επιφάνειας της Γης και η κωδικοποίηση των δεδομένων", "Η λήψη, προετοιμασία και προεπεξεργασία των δεδομένων", "Η οπτική ερμηνεία και τελική αξιολόγηση των εικόνων"],
+        correct: 1,
+        explanation: "Το ground segment παραλαμβάνει τα δεδομένα από την πλατφόρμα και τα προετοιμάζει/προεπεξεργάζεται ώστε να μπορούν να χρησιμοποιηθούν."
+      },
+      {
+        question: "Ποιο χαρακτηριστικό διακρίνει την προσέγγιση των θεματικών επιπέδων στην αναπαράσταση του γεωγραφικού χώρου;",
+        answers: ["Όλα τα αντικείμενα βρίσκονται σε ένα ενιαίο επίπεδο", "Κάθε επίπεδο περιέχει πληροφορίες για έναν συγκεκριμένο θεματικό σκοπό", "Τα δεδομένα οργανώνονται αποκλειστικά σε τρία επίπεδα"],
+        correct: 1,
+        explanation: "Στα θεματικά επίπεδα, κάθε layer αποθηκεύει συγκεκριμένο είδος πληροφορίας, όπως δρόμους, υδρογραφία, χρήσεις γης ή υψόμετρα."
+      },
+      {
+        question: "Γιατί η σκέδαση αποτελεί τον κυρίαρχο μηχανισμό δημιουργίας ραδιομετρικών αποκλίσεων στα δορυφορικά δεδομένα;",
+        answers: ["Επειδή τα δορυφορικά συστήματα λειτουργούν σε περιοχές του φάσματος όπου η απορρόφηση είναι μέγιστη", "Επειδή τα δορυφορικά συστήματα αποφεύγουν περιοχές έντονης απορρόφησης, άρα η σκέδαση επηρεάζει περισσότερο τα δεδομένα", "Επειδή η σκέδαση δεν εξαρτάται από το μήκος κύματος της ακτινοβολίας"],
+        correct: 1,
+        explanation: "Οι αισθητήρες συνήθως λειτουργούν σε ατμοσφαιρικά παράθυρα όπου η απορρόφηση είναι μικρότερη, οπότε η σκέδαση γίνεται πιο σημαντική πηγή απόκλισης."
+      },
+      {
+        question: "Ποιο από τα παρακάτω αποτελεί παράδειγμα συνεχούς (continuous) raster δεδομένου;",
+        answers: ["Χάρτης χρήσεων γης", "Τιμές εξατμισοδιαπνοής σε κάθε εικονοστοιχείο", "Κατάταξη υδρογραφικού δικτύου κατά Strahler"],
+        correct: 1,
+        explanation: "Η εξατμισοδιαπνοή μεταβάλλεται συνεχώς στον χώρο και μπορεί να αποδοθεί με αριθμητική τιμή σε κάθε pixel."
+      },
+      {
+        question: "Ποιο από τα παρακάτω είναι ΜΗ χωρικό (περιγραφικό) δεδομένο;",
+        answers: ["Η θέση μιας γεώτρησης", "Η κατηγορία Strahler ενός ρέματος", "Το σχήμα ενός οικοπέδου"],
+        correct: 1,
+        explanation: "Η κατηγορία Strahler είναι χαρακτηριστικό/ιδιότητα του ρέματος, όχι η θέση ή η γεωμετρία του."
+      },
+      {
+        question: "Ποιο από τα παρακάτω αποτελεί παράδειγμα πρωτογενών δεδομένων;",
+        answers: ["Δορυφορικές εικόνες από ESA/NASA", "Μετρήσεις GPS και αποτυπώσεις πεδίου", "Shapefiles από geodata.gov.gr"],
+        correct: 1,
+        explanation: "Πρωτογενή δεδομένα είναι αυτά που συλλέγονται άμεσα από τον ερευνητή ή την ομάδα, όπως GPS μετρήσεις και αποτυπώσεις πεδίου."
+      },
+      {
+        question: "Ποιο από τα παρακάτω αποτελεί θεματικό χαρακτηριστικό μιας γεωγραφικής οντότητας;",
+        answers: ["Η γεωγραφική της θέση", "Η σχέση γειτνίασης με άλλες οντότητες", "Η πυκνότητα πληθυσμού της"],
+        correct: 2,
+        explanation: "Η πυκνότητα πληθυσμού είναι περιγραφική/θεματική ιδιότητα της οντότητας, ενώ η θέση και οι σχέσεις είναι χωρικά χαρακτηριστικά."
+      },
+      {
+        question: "Ποιο από τα παρακάτω αποτελεί παράδειγμα χωρικής ακρίβειας (spatial accuracy);",
+        answers: ["Ένας δρόμος έχει καταχωρηθεί ως “πεζόδρομος” ενώ είναι κανονικός δρόμος", "Ένα σχολείο εμφανίζεται 20 μέτρα μακριά από την πραγματική του θέση", "Ένα dataset δεν αναφέρει τον δημιουργό του"],
+        correct: 1,
+        explanation: "Η χωρική ακρίβεια αφορά το πόσο κοντά βρίσκεται η καταγεγραμμένη θέση στην πραγματική θέση ενός αντικειμένου."
+      },
+      {
+        question: "Τι εκφράζει η χωρική διακριτική ικανότητα ενός δορυφορικού αισθητήρα;",
+        answers: ["Το μέγεθος του μικρότερου αντικειμένου ή της περιοχής εδάφους που μπορεί να καταγραφεί", "Τον αριθμό των φασματικών καναλιών που διαθέτει ο αισθητήρας", "Τον αριθμό των bits που χρησιμοποιούνται για την κωδικοποίηση της ακτινοβολίας"],
+        correct: 0,
+        explanation: "Η χωρική διακριτική ικανότητα συνδέεται με το μέγεθος του pixel και το ελάχιστο αντικείμενο/περιοχή που μπορεί να διακριθεί."
+      },
+      {
+        question: "Τι περιγράφει η ραδιομετρική διακριτική ικανότητα;",
+        answers: ["Το εύρος των μηκών κύματος που μπορεί να καταγράψει ο αισθητήρας", "Τον αριθμό των διακριτών επιπέδων τιμών στα οποία κωδικοποιείται το σήμα", "Τη συχνότητα με την οποία ο δορυφόρος επισκέπτεται την ίδια περιοχή"],
+        correct: 1,
+        explanation: "Η ραδιομετρική διακριτική ικανότητα δείχνει σε πόσα επίπεδα τιμών μπορεί να αποθηκευτεί η ένταση της ακτινοβολίας."
+      },
+      {
+        question: "Ποιο από τα παρακάτω ισχύει για τη χρονική διακριτική ικανότητα;",
+        answers: ["Μεγάλο εύρος φασματικών διαύλων σημαίνει υψηλή χρονική ανάλυση", "Αφορά τη συχνότητα κάλυψης της ίδιας περιοχής από τον δορυφόρο", "Εξαρτάται αποκλειστικά από τη ραδιομετρική ανάλυση του αισθητήρα"],
+        correct: 1,
+        explanation: "Η χρονική διακριτική ικανότητα σχετίζεται με το πόσο συχνά ένας αισθητήρας επισκέπτεται και καταγράφει την ίδια περιοχή."
+      },
+      {
+        question: "Ποιο από τα παρακάτω χαρακτηρίζει τα εσωτερικά σφάλματα στα δορυφορικά δεδομένα;",
+        answers: ["Προέρχονται από την ατμόσφαιρα και είναι απρόβλεπτα", "Οφείλονται στον αισθητήρα και είναι συστηματικά και σταθερά", "Προκαλούνται από αλλαγές στο ανάγλυφο του εδάφους"],
+        correct: 1,
+        explanation: "Τα εσωτερικά σφάλματα σχετίζονται με τον ίδιο τον αισθητήρα ή το σύστημα καταγραφής και συχνά έχουν συστηματικό χαρακτήρα."
+      },
+      {
+        question: "Ποιο είναι το κύριο αποτέλεσμα της ατμοσφαιρικής σκέδασης στα δορυφορικά δεδομένα;",
+        answers: ["Αύξηση της χωρικής ανάλυσης", "Μετατόπιση των ιστογραμμάτων προς υψηλότερες τιμές και απώλεια λεπτομέρειας", "Δημιουργία νέων φασματικών διαύλων"],
+        correct: 1,
+        explanation: "Η σκέδαση προσθέτει ακτινοβολία στο σήμα, ανεβάζει τις τιμές και μειώνει την αντίθεση/λεπτομέρεια της εικόνας."
+      },
+      {
+        question: "Ποια τεχνική χρησιμοποιείται για τη διόρθωση ραδιομετρικών σφαλμάτων μέσω ιστογραμμάτων;",
+        answers: ["Αφαίρεση της μέσης τιμής κάθε διαύλου", "Αφαίρεση της ελάχιστης τιμής κάθε διαύλου από όλα τα pixels", "Πολλαπλασιασμός των τιμών με τον συντελεστή παλινδρόμησης"],
+        correct: 1,
+        explanation: "Η αφαίρεση της ελάχιστης τιμής, γνωστή ως dark object subtraction, μειώνει την επίδραση της ατμοσφαιρικής σκέδασης."
+      },
+      {
+        question: "Ποιο από τα παρακάτω αποτελεί παράδειγμα ΜΗ συστηματικής γεωμετρικής απόκλισης;",
+        answers: ["Η καμπυλότητα της Γης", "Η περιστροφή της Γης", "Αλλαγές στο υψόμετρο, στην ταχύτητα ή στη θέση της πλατφόρμας"],
+        correct: 2,
+        explanation: "Οι μεταβολές στη θέση, ταχύτητα ή υψόμετρο της πλατφόρμας δεν είναι σταθερές και προκαλούν μη συστηματικές αποκλίσεις."
+      },
+      {
+        question: "Ποιο από τα παρακάτω αποτελεί συστηματική γεωμετρική απόκλιση;",
+        answers: ["Αλλαγές στο υψόμετρο της πλατφόρμας", "Μεταβολές στην ταχύτητα του δορυφόρου", "Η καμπυλότητα της Γης και η περιστροφή της Γης"],
+        correct: 2,
+        explanation: "Η καμπυλότητα και η περιστροφή της Γης είναι γνωστές και προβλέψιμες πηγές γεωμετρικών αποκλίσεων, άρα θεωρούνται συστηματικές."
+      },
+      {
+        question: "Ποιος είναι ο βασικός σκοπός της Ανάλυσης Κυρίων Συνιστωσών (PCA) στα δορυφορικά δεδομένα;",
+        answers: ["Να αυξήσει τη χωρική ανάλυση των εικόνων", "Να μειώσει τη διάσταση των δεδομένων διατηρώντας σχεδόν όλη την πληροφορία", "Να δημιουργήσει νέους φασματικούς διαύλους με μεγαλύτερο δυναμικό εύρος"],
+        correct: 1,
+        explanation: "Το PCA μετασχηματίζει τα δεδομένα ώστε η περισσότερη πληροφορία να συγκεντρώνεται σε λιγότερες συνιστώσες."
+      },
+      {
+        question: "Ποιο στοιχείο χαρακτηρίζει την επιβλεπόμενη ταξινόμηση;",
+        answers: ["Οι φασματικές τάξεις δημιουργούνται τυχαία και ερμηνεύονται μετά", "Ο προσδιορισμός των τάξεων γίνεται αποκλειστικά από τον αλγόριθμο χωρίς καμία ανθρώπινη παρέμβαση", "Απαιτείται η χρήση περιοχών εκμάθησης γνωστής ταυτότητας"],
+        correct: 2,
+        explanation: "Στην επιβλεπόμενη ταξινόμηση ο χρήστης δίνει περιοχές εκμάθησης γνωστής κατηγορίας για να εκπαιδευτεί ο ταξινομητής."
+      },
+      {
+        question: "Ποιο από τα παρακάτω αποτελεί πλεονέκτημα της μη επιβλεπόμενης ταξινόμησης;",
+        answers: ["Ο χρήστης έχει πλήρη έλεγχο στον καθορισμό των τάξεων", "Δεν απαιτείται εκ των προτέρων γνώση των θεματικών τάξεων", "Οι πληροφοριακές τάξεις είναι πάντα ίδιες με τις φασματικές"],
+        correct: 1,
+        explanation: "Η μη επιβλεπόμενη ταξινόμηση ομαδοποιεί pixels με βάση τη φασματική τους ομοιότητα χωρίς να χρειάζονται αρχικές γνωστές τάξεις."
+      },
+      {
+        question: "Ποια είναι η βασική προϋπόθεση για αποτελεσματική ποσοτική ανάλυση δορυφορικών δεδομένων;",
+        answers: ["Η χρήση μόνο ενός φασματικού διαύλου", "Η ύπαρξη εικόνων πολύ υψηλής χωρικής ανάλυσης", "Η πλήρης κατανόηση των φασματικών χαρακτηριστικών των αντικειμένων"],
+        correct: 2,
+        explanation: "Για σωστή ποσοτική ανάλυση πρέπει να γνωρίζουμε πώς συμπεριφέρονται φασματικά τα αντικείμενα που μελετάμε."
+      }
+    ];
+
+    let currentQuestion = 0;
+    let selectedAnswer = null;
+    let correctAnswers = 0;
+    let answered = false;
+
+    const questionText = document.getElementById("question-text");
+    const answersBox = document.getElementById("answers");
+    const feedbackBox = document.getElementById("feedback-box");
+    const nextBtn = document.getElementById("next-btn");
+    const questionCounter = document.getElementById("question-counter");
+    const progressPercent = document.getElementById("progress-percent");
+    const progressFill = document.getElementById("progress-fill");
+    const quizSection = document.getElementById("quiz-section");
+    const resultsSection = document.getElementById("results-section");
+    const scoreText = document.getElementById("score-text");
+    const correctFill = document.getElementById("correct-fill");
+    const wrongFill = document.getElementById("wrong-fill");
+    const correctPercentText = document.getElementById("correct-percent-text");
+    const wrongPercentText = document.getElementById("wrong-percent-text");
+    const restartBtn = document.getElementById("restart-btn");
+
+    function loadQuestion() {
+      selectedAnswer = null;
+      answered = false;
+      nextBtn.disabled = true;
+      feedbackBox.className = "feedback";
+      feedbackBox.innerHTML = "";
+
+      const q = questions[currentQuestion];
+      const letters = ["a", "b", "c"];
+      questionText.textContent = `${currentQuestion + 1}. ${q.question}`;
+      answersBox.innerHTML = "";
+
+      q.answers.forEach((answer, index) => {
+        const button = document.createElement("button");
+        button.className = "answer-btn";
+        button.textContent = `${letters[index]}. ${answer}`;
+        button.onclick = () => selectAnswer(index);
+        answersBox.appendChild(button);
+      });
+
+      questionCounter.textContent = `Ερώτηση ${currentQuestion + 1} / ${questions.length}`;
+      updateProgress();
+
+      nextBtn.textContent = currentQuestion === questions.length - 1 ? "Τέλος Quiz" : "Επόμενη Ερώτηση";
+    }
+
+    function selectAnswer(index) {
+      if (answered) return;
+
+      answered = true;
+      selectedAnswer = index;
+      nextBtn.disabled = false;
+
+      const q = questions[currentQuestion];
+      const answerButtons = document.querySelectorAll(".answer-btn");
+      const isCorrect = selectedAnswer === q.correct;
+
+      if (isCorrect) {
+        correctAnswers++;
+      }
+
+      answerButtons.forEach((btn, btnIndex) => {
+        btn.disabled = true;
+
+        if (btnIndex === q.correct) {
+          btn.classList.add("correct");
+        } else {
+          btn.classList.add("wrong");
+        }
+      });
+
+      feedbackBox.className = isCorrect ? "feedback correct-box" : "feedback wrong-box";
+      feedbackBox.innerHTML = `
+        <strong>${isCorrect ? "Σωστή απάντηση!" : "Λάθος απάντηση."}</strong>
+        <p><b>Η σωστή απάντηση είναι:</b> ${q.answers[q.correct]}</p>
+        <p><b>Γιατί:</b> ${q.explanation}</p>
+      `;
+    }
+
+    function updateProgress() {
+      const percent = Math.round((currentQuestion / questions.length) * 100);
+      progressFill.style.width = `${percent}%`;
+      progressPercent.textContent = `${percent}%`;
+    }
+
+    function nextQuestion() {
+      currentQuestion++;
+
+      if (currentQuestion < questions.length) {
+        loadQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function showResults() {
+      quizSection.style.display = "none";
+      resultsSection.style.display = "block";
+
+      const wrongAnswers = questions.length - correctAnswers;
+      const correctPercent = Math.round((correctAnswers / questions.length) * 100);
+      const wrongPercent = Math.round((wrongAnswers / questions.length) * 100);
+
+      scoreText.innerHTML = `Σωστές: <strong>${correctAnswers}</strong><br>Λάθος: <strong>${wrongAnswers}</strong><br>Σύνολο ερωτήσεων: <strong>${questions.length}</strong>`;
+
+      correctFill.style.width = `${correctPercent}%`;
+      wrongFill.style.width = `${wrongPercent}%`;
+      correctPercentText.textContent = `${correctPercent}%`;
+      wrongPercentText.textContent = `${wrongPercent}%`;
+    }
+
+    function restartQuiz() {
+      currentQuestion = 0;
+      selectedAnswer = null;
+      correctAnswers = 0;
+      answered = false;
+
+      resultsSection.style.display = "none";
+      quizSection.style.display = "block";
+
+      correctFill.style.width = "0%";
+      wrongFill.style.width = "0%";
+
+      loadQuestion();
+    }
+
+    nextBtn.addEventListener("click", nextQuestion);
+    restartBtn.addEventListener("click", restartQuiz);
+
+    loadQuestion();
+  </script>
+</body>
+</html>
