@@ -412,10 +412,7 @@
       const buttons = document.querySelectorAll(".answer-btn");
       const isCorrect = (index === q.correct);
 
-      // Απενεργοποίηση όλων
       buttons.forEach(btn => btn.disabled = true);
-
-      // ✅ Όλες οι λάθος κοκκινίζουν, μόνο η σωστή πρασινίζει
       buttons.forEach((btn, i) => {
         if (i === q.correct) {
           btn.classList.add("correct");
